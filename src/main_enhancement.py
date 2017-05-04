@@ -17,7 +17,7 @@ from image_enhance import image_enhance
 
 if(len(sys.argv)<2):
     print('loading sample image');
-    img_name = '2.jpg'
+    img_name = '1.jpg'
     img = scipy.ndimage.imread('../images/' + img_name);
 elif(len(sys.argv) >= 2):
     img_name = sys.argv[1];
