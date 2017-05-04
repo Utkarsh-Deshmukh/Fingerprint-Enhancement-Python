@@ -5,7 +5,7 @@
 1) go into the src folder
 
 2) run the following command:
-     python main_enhancement.py
+  -   python main_enhancement.py
   
 3) The sample images are stored in the "images" folder
 
