@@ -3,8 +3,7 @@
 Uses oriented gabor filter bank to enhance the fingerprint image. The orientation of the gabor filters is decided by the orientation of ridges in the input image. 
 
 ## Results
-![fp_enh](https://cloud.githubusercontent.com/assets/13918778/25731461/7160b82e-30fb-11e7-82a3-76a419d6ce75.png)
-
+![temp](https://cloud.githubusercontent.com/assets/13918778/25770604/637b3f38-31ee-11e7-818f-1f8359c96e07.jpg)
 ## Running the tests
 
 1) go into the src folder
