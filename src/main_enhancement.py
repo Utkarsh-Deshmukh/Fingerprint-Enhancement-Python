@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     if(len(sys.argv)<2):
         print('loading sample image');
-        img_name = '1.jpg'
+        img_name = '3.jpg'
         img = cv2.imread('../images/' + img_name)
     elif(len(sys.argv) >= 2):
         img_name = sys.argv[1];
@@ -23,6 +23,8 @@ if __name__ == '__main__':
 
     if(len(img.shape)>2):
          img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+    #img = img[250:950, 900:1912]
 
     rows,cols = np.shape(img);
     aspect_ratio = np.double(rows)/np.double(cols);
@@ -35,6 +37,6 @@ if __name__ == '__main__':
     enhanced_img = image_enhance(img);
 
     print('saving the image')
-    cv2.imwrite('../enhanced/' + img_name, (255*enhanced_img))
+    cv2.imwrite('../enhanced/' + 'check_' + img_name, (255*enhanced_img))
 
 
