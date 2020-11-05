@@ -7,14 +7,12 @@ Uses oriented gabor filter bank to enhance the fingerprint image. The orientatio
 ## Running the tests
 
 1) go into the src folder
+- if on "develop" branch, run the file "example.py"
+- if on "master" branch, run the file file "main_enhancement.py" 
 
+2) The sample images are stored in the "images" folder
 
-	1-a) if on "develop" branch, run the file "example.py"
-	1-b) if on "master" branch, run the file file "main_enhancement.py" 
-
-3) The sample images are stored in the "images" folder
-
-4) The enhanced image will be stored in the "enhanced" folder
+3) The enhanced image will be stored in the "enhanced" folder
 
 ## Theory
 - We use oriented gabor filters to enhance a fingerprint image. The orientation of the gabor filters are based on the orientation of the ridges. the shape of the gabor filter is based on the frequency and wavelength of the ridges.
