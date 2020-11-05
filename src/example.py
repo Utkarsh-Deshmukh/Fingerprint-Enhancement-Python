@@ -23,5 +23,5 @@ if __name__ == '__main__':
     if(len(img.shape)>2):                               # convert image into gray if necessary
          img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
-    out = image_enhancer.enhance(img, resize=False)     # run image enhancer
+    out = image_enhancer.enhance(img)     # run image enhancer
     image_enhancer.save_enhanced_image('../enhanced/' + img_name)   # save output
