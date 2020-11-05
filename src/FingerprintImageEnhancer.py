@@ -40,6 +40,47 @@ class FingerprintImageEnhancer(object):
         return (normed)
 
     def __ridge_segment(self, img):
+        # RIDGESEGMENT - Normalises fingerprint image and segments ridge region
+        #
+        # Function identifies ridge regions of a fingerprint image and returns a
+        # mask identifying this region.  It also normalises the intesity values of
+        # the image so that the ridge regions have zero mean, unit standard
+        # deviation.
+        #
+        # This function breaks the image up into blocks of size blksze x blksze and
+        # evaluates the standard deviation in each region.  If the standard
+        # deviation is above the threshold it is deemed part of the fingerprint.
+        # Note that the image is normalised to have zero mean, unit standard
+        # deviation prior to performing this process so that the threshold you
+        # specify is relative to a unit standard deviation.
+        #
+        # Usage:   [normim, mask, maskind] = ridgesegment(im, blksze, thresh)
+        #
+        # Arguments:   im     - Fingerprint image to be segmented.
+        #              blksze - Block size over which the the standard
+        #                       deviation is determined (try a value of 16).
+        #              thresh - Threshold of standard deviation to decide if a
+        #                       block is a ridge region (Try a value 0.1 - 0.2)
+        #
+        # Ouput:     normim - Image where the ridge regions are renormalised to
+        #                       have zero mean, unit standard deviation.
+        #              mask   - Mask indicating ridge-like regions of the image,
+        #                       0 for non ridge regions, 1 for ridge regions.
+        #              maskind - Vector of indices of locations within the mask.
+        #
+        # Suggested values for a 500dpi fingerprint image:
+        #
+        #   [normim, mask, maskind] = ridgesegment(im, 16, 0.1)
+        #
+        # See also: RIDGEORIENT, RIDGEFREQ, RIDGEFILTER
+
+        ### REFERENCES
+
+        # Peter Kovesi
+        # School of Computer Science & Software Engineering
+        # The University of Western Australia
+        # pk at csse uwa edu au
+        # http://www.csse.uwa.edu.au/~pk
         rows, cols = img.shape
         im = self.__normalise(img, 0, 1)  # normalise to get zero mean and unit standard deviation
 
@@ -62,6 +103,52 @@ class FingerprintImageEnhancer(object):
         self._normim = (im - mean_val) / (std_val);
 
     def __ridge_orient(self):
+        # RIDGEORIENT - Estimates the local orientation of ridges in a fingerprint
+        #
+        # Usage:  [orientim, reliability, coherence] = ridgeorientation(im, gradientsigma,...
+        #                                             blocksigma, ...
+        #                                             orientsmoothsigma)
+        #
+        # Arguments:  im                - A normalised input image.
+        #             gradientsigma     - Sigma of the derivative of Gaussian
+        #                                 used to compute image gradients.
+        #             blocksigma        - Sigma of the Gaussian weighting used to
+        #                                 sum the gradient moments.
+        #             orientsmoothsigma - Sigma of the Gaussian used to smooth
+        #                                 the final orientation vector field.
+        #                                 Optional: if ommitted it defaults to 0
+        #
+        # Output:    orientim          - The orientation image in radians.
+        #                                 Orientation values are +ve clockwise
+        #                                 and give the direction *along* the
+        #                                 ridges.
+        #             reliability       - Measure of the reliability of the
+        #                                 orientation measure.  This is a value
+        #                                 between 0 and 1. I think a value above
+        #                                 about 0.5 can be considered 'reliable'.
+        #                                 reliability = 1 - Imin./(Imax+.001);
+        #             coherence         - A measure of the degree to which the local
+        #                                 area is oriented.
+        #                                 coherence = ((Imax-Imin)./(Imax+Imin)).^2;
+        #
+        # With a fingerprint image at a 'standard' resolution of 500dpi suggested
+        # parameter values might be:
+        #
+        #    [orientim, reliability] = ridgeorient(im, 1, 3, 3);
+        #
+        # See also: RIDGESEGMENT, RIDGEFREQ, RIDGEFILTER
+
+        ### REFERENCES
+
+        # May 2003      Original version by Raymond Thai,
+        # January 2005  Reworked by Peter Kovesi
+        # October 2011  Added coherence computation and orientsmoothsigma made optional
+        #
+        # School of Computer Science & Software Engineering
+        # The University of Western Australia
+        # pk at csse uwa edu au
+        # http://www.csse.uwa.edu.au/~pk
+
         rows,cols = self._normim.shape
         #Calculate image gradients.
         sze = np.fix(6*self.gradient_sigma)
@@ -110,6 +197,55 @@ class FingerprintImageEnhancer(object):
         self._orientim = np.pi/2 + np.arctan2(sin2theta,cos2theta)/2
 
     def __ridge_freq(self):
+        # RIDGEFREQ - Calculates a ridge frequency image
+        #
+        # Function to estimate the fingerprint ridge frequency across a
+        # fingerprint image. This is done by considering blocks of the image and
+        # determining a ridgecount within each block by a call to FREQEST.
+        #
+        # Usage:
+        #  [freqim, medianfreq] =  ridgefreq(im, mask, orientim, blksze, windsze, ...
+        #                                    minWaveLength, maxWaveLength)
+        #
+        # Arguments:
+        #         im       - Image to be processed.
+        #         mask     - Mask defining ridge regions (obtained from RIDGESEGMENT)
+        #         orientim - Ridge orientation image (obtained from RIDGORIENT)
+        #         blksze   - Size of image block to use (say 32)
+        #         windsze  - Window length used to identify peaks. This should be
+        #                    an odd integer, say 3 or 5.
+        #         minWaveLength,  maxWaveLength - Minimum and maximum ridge
+        #                     wavelengths, in pixels, considered acceptable.
+        #
+        # Output:
+        #         freqim     - An image  the same size as im with  values set to
+        #                      the estimated ridge spatial frequency within each
+        #                      image block.  If a  ridge frequency cannot be
+        #                      found within a block, or cannot be found within the
+        #                      limits set by min and max Wavlength freqim is set
+        #                      to zeros within that block.
+        #         medianfreq - Median frequency value evaluated over all the
+        #                      valid regions of the image.
+        #
+        # Suggested parameters for a 500dpi fingerprint image
+        #   [freqim, medianfreq] = ridgefreq(im,orientim, 32, 5, 5, 15);
+        #
+
+        # See also: RIDGEORIENT, FREQEST, RIDGESEGMENT
+
+        # Reference:
+        # Hong, L., Wan, Y., and Jain, A. K. Fingerprint image enhancement:
+        # Algorithm and performance evaluation. IEEE Transactions on Pattern
+        # Analysis and Machine Intelligence 20, 8 (1998), 777 789.
+
+        ### REFERENCES
+
+        # Peter Kovesi
+        # School of Computer Science & Software Engineering
+        # The University of Western Australia
+        # pk at csse uwa edu au
+        # http://www.csse.uwa.edu.au/~pk
+
         rows, cols = self._normim.shape
         freq = np.zeros((rows, cols))
 
@@ -135,6 +271,42 @@ class FingerprintImageEnhancer(object):
         self._freq = self._mean_freq * self._mask
 
     def __frequest(self, blkim, blkor):
+        # FREQEST - Estimate fingerprint ridge frequency within image block
+        #
+        # Function to estimate the fingerprint ridge frequency within a small block
+        # of a fingerprint image.  This function is used by RIDGEFREQ
+        #
+        # Usage:
+        #  freqim =  freqest(im, orientim, windsze, minWaveLength, maxWaveLength)
+        #
+        # Arguments:
+        #         im       - Image block to be processed.
+        #         orientim - Ridge orientation image of image block.
+        #         windsze  - Window length used to identify peaks. This should be
+        #                    an odd integer, say 3 or 5.
+        #         minWaveLength,  maxWaveLength - Minimum and maximum ridge
+        #                     wavelengths, in pixels, considered acceptable.
+        #
+        # Output:
+        #         freqim    - An image block the same size as im with all values
+        #                     set to the estimated ridge spatial frequency.  If a
+        #                     ridge frequency cannot be found, or cannot be found
+        #                     within the limits set by min and max Wavlength
+        #                     freqim is set to zeros.
+        #
+        # Suggested parameters for a 500dpi fingerprint image
+        #   freqim = freqest(im,orientim, 5, 5, 15);
+        #
+        # See also:  RIDGEFREQ, RIDGEORIENT, RIDGESEGMENT
+
+        ### REFERENCES
+
+        # Peter Kovesi
+        # School of Computer Science & Software Engineering
+        # The University of Western Australia
+        # pk at csse uwa edu au
+        # http://www.csse.uwa.edu.au/~pk
+
         rows, cols = np.shape(blkim);
 
         # Find mean orientation within the block. This is done by averaging the
@@ -191,6 +363,47 @@ class FingerprintImageEnhancer(object):
                 return(np.zeros(blkim.shape))
 
     def __ridge_filter(self):
+        # RIDGEFILTER - enhances fingerprint image via oriented filters
+        #
+        # Function to enhance fingerprint image via oriented filters
+        #
+        # Usage:
+        #  newim =  ridgefilter(im, orientim, freqim, kx, ky, showfilter)
+        #
+        # Arguments:
+        #         im       - Image to be processed.
+        #         orientim - Ridge orientation image, obtained from RIDGEORIENT.
+        #         freqim   - Ridge frequency image, obtained from RIDGEFREQ.
+        #         kx, ky   - Scale factors specifying the filter sigma relative
+        #                    to the wavelength of the filter.  This is done so
+        #                    that the shapes of the filters are invariant to the
+        #                    scale.  kx controls the sigma in the x direction
+        #                    which is along the filter, and hence controls the
+        #                    bandwidth of the filter.  ky controls the sigma
+        #                    across the filter and hence controls the
+        #                    orientational selectivity of the filter. A value of
+        #                    0.5 for both kx and ky is a good starting point.
+        #         showfilter - An optional flag 0/1.  When set an image of the
+        #                      largest scale filter is displayed for inspection.
+        #
+        # Output:
+        #         newim    - The enhanced image
+        #
+        # See also: RIDGEORIENT, RIDGEFREQ, RIDGESEGMENT
+
+        # Reference:
+        # Hong, L., Wan, Y., and Jain, A. K. Fingerprint image enhancement:
+        # Algorithm and performance evaluation. IEEE Transactions on Pattern
+        # Analysis and Machine Intelligence 20, 8 (1998), 777 789.
+
+        ### REFERENCES
+
+        # Peter Kovesi
+        # School of Computer Science & Software Engineering
+        # The University of Western Australia
+        # pk at csse uwa edu au
+        # http://www.csse.uwa.edu.au/~pk
+
         angleInc = 3
         im = np.double(self._normim)
         rows, cols = im.shape
@@ -281,9 +494,13 @@ class FingerprintImageEnhancer(object):
         self._binim = newim < -3
 
     def save_enhanced_image(self, path):
+        # saves the enhanced image at the specified path
         cv2.imwrite(path, (255 * self._binim))
 
     def enhance(self, img, resize=True):
+        # main function to enhance the image.
+        # calls all other subroutines
+
         if(resize):
             rows, cols = np.shape(img);
             aspect_ratio = np.double(rows) / np.double(cols);
@@ -293,8 +510,8 @@ class FingerprintImageEnhancer(object):
 
             img = cv2.resize(img, (np.int(new_cols), np.int(new_rows)));
 
-        self.__ridge_segment(img)  # normalise the image and find a ROI
-        self.__ridge_orient()
-        self.__ridge_freq()
-        self.__ridge_filter()
+        self.__ridge_segment(img)   # normalise the image and find a ROI
+        self.__ridge_orient()       # compute orientation image
+        self.__ridge_freq()         # compute major frequency of ridges
+        self.__ridge_filter()       # filter the image using oriented gabor filter
         return(self._binim)
