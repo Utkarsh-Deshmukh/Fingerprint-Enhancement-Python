@@ -8,7 +8,9 @@ Uses oriented gabor filter bank to enhance the fingerprint image. The orientatio
 
 1) go into the src folder
 
-2) run the example.py file
+
+	1-a) if on "develop" branch, run the file "example.py"
+	1-b) if on "master" branch, run the file file "main_enhancement.py" 
 
 3) The sample images are stored in the "images" folder
 
