@@ -4,7 +4,8 @@ Created on Mon Nov 4 19:46:32 2020
 
 @author: utkarsh
 """
-
+# Deal with black image, not several frequencies
+# np.std(img) will give 0 ??
 import numpy as np
 import cv2
 from scipy import signal
@@ -39,7 +40,11 @@ class FingerprintImageEnhancer(object):
         self._binim = []
 
     def __normalise(self, img, mean, std):
-        normed = (img - np.mean(img)) / (np.std(img))
+        try:
+            normed = (img - np.mean(img)) / (np.std(img))
+        except IndexError:
+            print("Index Error. Review image given.")
+            return None
         return (normed)
 
     def __ridge_segment(self, img):
