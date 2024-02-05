@@ -30,6 +30,9 @@ Uses oriented gabor filter bank to enhance the fingerprint image. The orientatio
 
 3) The enhanced image will be stored in the "enhanced" folder
 
+## Linter check:
+run the command `python devtool.py run` to run linter checks.
+
 ## important note:
 The Develop Branch is what is up to date. Other branches might not be up to date.
 

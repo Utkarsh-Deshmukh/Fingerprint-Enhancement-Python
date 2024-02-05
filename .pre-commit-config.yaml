@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files # Not to commit huge files
+      - id: check-case-conflict # Check for conflicts in case sensitive files
+      - id: check-executables-have-shebangs # executables must have shebang
+      - id: check-yaml # check yaml files for parsable syntax
+      - id: end-of-file-fixer # check for end of file fixer
+      - id: trailing-whitespace # check for trailing whitespaces
+      - id: check-merge-conflict # check for files containing merge conflicts
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.0-alpha.9-for-vscode
+    hooks:
+      - id: prettier
+        files: .(json|yaml|yml)
+
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args: ["--config", ".black_config"]
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v2.17.4
+    hooks:
+      - id: pylint
+    args: [.pylintrc]
