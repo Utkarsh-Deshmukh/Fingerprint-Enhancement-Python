@@ -102,7 +102,9 @@ class FingerprintImageEnhancer:
         # pk at csse uwa edu au
         # http://www.csse.uwa.edu.au/~pk
         rows, cols = img.shape
-        normalized_im = self.__normalise(img, 0, 1)  # normalise to get zero mean and unit standard deviation
+
+        # normalized_im = self.__normalise(img, 0, 1)  # normalise to get zero mean and unit standard deviation
+        normalized_im = self.__normalise(img)  # normalise to get zero mean and unit standard deviation
 
         new_rows = int(self.ridge_segment_blksze * np.ceil((float(rows)) / (float(self.ridge_segment_blksze))))
         new_cols = int(self.ridge_segment_blksze * np.ceil((float(cols)) / (float(self.ridge_segment_blksze))))
@@ -179,7 +181,8 @@ class FingerprintImageEnhancer:
         gauss = cv2.getGaussianKernel(int(sze), self.gradient_sigma)
         filter_gauss = gauss * gauss.T
 
-        filter_grad_x, filter_grad_y = np.gradient(filter_gauss)  # Gradient of Gaussian
+        # filter_grad_x, filter_grad_y = np.gradient(filter_gauss)  # Gradient of Gaussian
+        filter_grad_y, filter_grad_x = np.gradient(filter_gauss)  # Gradient of Gaussian
 
         gradient_x = signal.convolve2d(self._normim, filter_grad_x, mode="same")
         gradient_y = signal.convolve2d(self._normim, filter_grad_y, mode="same")
