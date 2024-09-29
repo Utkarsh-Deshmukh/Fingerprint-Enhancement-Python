@@ -6,32 +6,64 @@ Created on Mon Nov 4 19:46:32 2020
 """
 
 import math
-import numpy as np
+import os
+
 import cv2
-from scipy import signal
-from scipy import ndimage
+import numpy as np
 import scipy
+from scipy import ndimage, signal
 
 
-# pylint: disable=too-many-instance-attributes, too-many-function-args, too-many-locals
+# pylint: disable=too-many-instance-attributes, too-many-function-args, too-many-locals, too-many-arguments
 class FingerprintImageEnhancer:
     """Fingerprint Enhancer Object."""
 
-    def __init__(self):
-        """Initialize the object."""
-        self.ridge_segment_blksze = 16
-        self.ridge_segment_thresh = 0.1
-        self.gradient_sigma = 1
-        self.block_sigma = 7
-        self.orient_smooth_sigma = 7
-        self.ridge_freq_blksze = 38
-        self.ridge_freq_windsze = 5
-        self.min_wave_length = 5
-        self.max_wave_length = 15
-        self.relative_scale_factor_x = 0.65
-        self.relative_scale_factor_y = 0.65
-        self.angle_inc = 3
-        self.ridge_filter_thresh = -3
+    def __init__(
+        self,
+        ridge_segment_blksze=16,
+        ridge_segment_thresh=0.1,
+        gradient_sigma=1,
+        block_sigma=7,
+        orient_smooth_sigma=7,
+        ridge_freq_blksze=38,
+        ridge_freq_windsze=5,
+        min_wave_length=5,
+        max_wave_length=15,
+        relative_scale_factor_x=0.65,
+        relative_scale_factor_y=0.65,
+        angle_inc=3.0,
+        ridge_filter_thresh=-3,
+    ):
+        """initialize the object
+
+        Args:
+            ridge_segment_blksze (int, optional): ridge_segment_blksze. Defaults to 16.
+            ridge_segment_thresh (float, optional): ridge_segment_thresh. Defaults to 0.1.
+            gradient_sigma (int, optional): gradient_sigma. Defaults to 1.
+            block_sigma (int, optional): block_sigma. Defaults to 7.
+            orient_smooth_sigma (int, optional): orient_smooth_sigma. Defaults to 7.
+            ridge_freq_blksze (int, optional): block size for ridge_freq calculation. Defaults to 38.
+            ridge_freq_windsze (int, optional): window size for ridge_freq calculation. Defaults to 5.
+            min_wave_length (int, optional): min_wave_length. Defaults to 5.
+            max_wave_length (int, optional): max_wave_length. Defaults to 15.
+            relative_scale_factor_x (float, optional): relative_scale_factor_x. Defaults to 0.65.
+            relative_scale_factor_y (float, optional): relative_scale_factor_x. Defaults to 0.65.
+            angle_inc (float, optional): angle increment for gabor filtering. Defaults to 3.0.
+            ridge_filter_thresh (int, optional): ridge filter threshold. Defaults to -3.
+        """
+        self.ridge_segment_blksze = ridge_segment_blksze
+        self.ridge_segment_thresh = ridge_segment_thresh
+        self.gradient_sigma = gradient_sigma
+        self.block_sigma = block_sigma
+        self.orient_smooth_sigma = orient_smooth_sigma
+        self.ridge_freq_blksze = ridge_freq_blksze
+        self.ridge_freq_windsze = ridge_freq_windsze
+        self.min_wave_length = min_wave_length
+        self.max_wave_length = max_wave_length
+        self.relative_scale_factor_x = relative_scale_factor_x
+        self.relative_scale_factor_y = relative_scale_factor_y
+        self.angle_inc = angle_inc
+        self.ridge_filter_thresh = ridge_filter_thresh
 
         self._mask = []
         self._normim = []
@@ -515,18 +547,20 @@ class FingerprintImageEnhancer:
         Args:
             path (str): image name.
         """
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         # saves the enhanced image at the specified path
         cv2.imwrite(path, (255 * self._binim))
 
-    def enhance(self, img: np.ndarray, resize: bool = True) -> np.ndarray:
+    def enhance(self, img: np.ndarray, resize: bool = True, invert_output=False) -> np.ndarray:
         """Enhance the input image.
 
         Args:
             img (np.ndarray): input image.
             resize (bool, optional): resize the input image. Defaults to True.
+            invert_output (bool, optional): invert the output
 
         Returns:
-            _type_np.ndarray: return the enhanced image.
+            np.ndarray: return the enhanced image.
         """
         if resize:
             rows, cols = np.shape(img)
@@ -541,4 +575,67 @@ class FingerprintImageEnhancer:
         self.__ridge_orient()  # compute orientation image
         self.__ridge_freq()  # compute major frequency of ridges
         self.__ridge_filter()  # filter the image using oriented gabor filter
+        if invert_output:
+            self._binim ^= True
         return self._binim
+
+
+# pylint: disable = too-many-arguments
+def enhance_fingerprint(
+    img: np.ndarray,
+    resize: bool = False,
+    ridge_segment_blksze: int = 16,
+    ridge_segment_thresh: float = 0.1,
+    gradient_sigma: int = 1,
+    block_sigma: int = 7,
+    orient_smooth_sigma: int = 7,
+    ridge_freq_blksze: int = 38,
+    ridge_freq_windsze: int = 5,
+    min_wave_length: int = 5,
+    max_wave_length: int = 15,
+    relative_scale_factor_x: float = 0.65,
+    relative_scale_factor_y: float = 0.65,
+    angle_inc: float = 3.0,
+    ridge_filter_thresh: int = -3,
+    invert_output: bool = False,
+) -> np.ndarray:
+    """enhance the input image.
+
+    Args:
+        img (np.ndarray): input image
+        resize (bool, optional): resize the input image to a fixed size. Defaults to False.
+        ridge_segment_blksze (int, optional): ridge_segment_blksze. Defaults to 16.
+        ridge_segment_thresh (float, optional): ridge_segment_thresh. Defaults to 0.1.
+        gradient_sigma (int, optional): gradient_sigma. Defaults to 1.
+        block_sigma (int, optional): block_sigma. Defaults to 7.
+        orient_smooth_sigma (int, optional): orient_smooth_sigma. Defaults to 7.
+        ridge_freq_blksze (int, optional): block size for ridge_freq calculation. Defaults to 38.
+        ridge_freq_windsze (int, optional): window size for ridge_freq calculation. Defaults to 5.
+        min_wave_length (int, optional): min_wave_length. Defaults to 5.
+        max_wave_length (int, optional): max_wave_length. Defaults to 15.
+        relative_scale_factor_x (float, optional): relative_scale_factor_x. Defaults to 0.65.
+        relative_scale_factor_y (float, optional): relative_scale_factor_x. Defaults to 0.65.
+        angle_inc (float, optional): angle increment for gabor filtering. Defaults to 3.0.
+        ridge_filter_thresh (int, optional): ridge filter threshold. Defaults to -3.
+        invert_output (bool, optional): flag to invert the enhanced-output. Defaults to False.
+
+    Returns:
+        np.ndarray: _description_
+    """
+    image_enhancer = FingerprintImageEnhancer(
+        ridge_segment_blksze,
+        ridge_segment_thresh,
+        gradient_sigma,
+        block_sigma,
+        orient_smooth_sigma,
+        ridge_freq_blksze,
+        ridge_freq_windsze,
+        min_wave_length,
+        max_wave_length,
+        relative_scale_factor_x,
+        relative_scale_factor_y,
+        angle_inc,
+        ridge_filter_thresh,
+    )  # Create object called image_enhancer
+    enhanced_output = image_enhancer.enhance(img, resize, invert_output=invert_output)
+    return enhanced_output
