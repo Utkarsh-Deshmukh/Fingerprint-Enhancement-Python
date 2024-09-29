@@ -7,7 +7,7 @@ Created on Mon Apr 18 11:42:58 2016
 
 import sys
 import cv2
-from fingerprint_image_enhancer import FingerprintImageEnhancer
+from fingerprint_enhancer.fingerprint_image_enhancer import FingerprintImageEnhancer
 
 if __name__ == "__main__":
     image_enhancer = FingerprintImageEnhancer()  # Create object called image_enhancer
@@ -22,5 +22,5 @@ if __name__ == "__main__":
     if len(img.shape) > 2:  # convert image into gray if necessary
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    out = image_enhancer.enhance(img)  # run image enhancer
+    image_enhancer.enhance(img, invert_output=True)  # run image enhancer
     image_enhancer.save_enhanced_image("enhanced/" + IMG_NAME)  # save output

@@ -1,6 +1,7 @@
 """Module to run pre commit checks for staged files."""
 from subprocess import check_call
 import os
+
 import fire
 import git
 
