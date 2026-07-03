@@ -49,7 +49,7 @@ class FingerprintImageEnhancer:
             relative_scale_factor_x (float, optional): relative_scale_factor_x. Defaults to 0.65.
             relative_scale_factor_y (float, optional): relative_scale_factor_x. Defaults to 0.65.
             angle_inc (float, optional): angle increment for gabor filtering. Defaults to 3.0.
-            ridge_filter_thresh (int, optional): ridge filter threshold. Defaults to -3.
+            ridge_filter_thresh (float, optional): ridge filter threshold. Defaults to -3.
         """
         self.ridge_segment_blksze = ridge_segment_blksze
         self.ridge_segment_thresh = ridge_segment_thresh
@@ -596,7 +596,7 @@ def enhance_fingerprint(
     relative_scale_factor_x: float = 0.65,
     relative_scale_factor_y: float = 0.65,
     angle_inc: float = 3.0,
-    ridge_filter_thresh: int = -3,
+    ridge_filter_thresh: float = -3,
     invert_output: bool = False,
 ) -> np.ndarray:
     """enhance the input image.
@@ -616,7 +616,7 @@ def enhance_fingerprint(
         relative_scale_factor_x (float, optional): relative_scale_factor_x. Defaults to 0.65.
         relative_scale_factor_y (float, optional): relative_scale_factor_x. Defaults to 0.65.
         angle_inc (float, optional): angle increment for gabor filtering. Defaults to 3.0.
-        ridge_filter_thresh (int, optional): ridge filter threshold. Defaults to -3.
+        ridge_filter_thresh (float, optional): ridge filter threshold. Defaults to -3.
         invert_output (bool, optional): flag to invert the enhanced-output. Defaults to False.
 
     Returns:
